@@ -1,0 +1,60 @@
+---
+- hosts: harbor_servers
+  become: yes
+  tasks:
+    - name: Update apt package index
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - git
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Download Harbor installer
+      get_url:
+        url: "https://github.com/goharbor/harbor/releases/download/v1.10.19-rc1/harbor-offline-installer-v1.10.19-rc1.tgz"
+        dest: /tmp/harbor-offline-installer-v1.10.19-rc1.tgz
+
+    - name: Extract Harbor installer
+      ansible.builtin.unarchive:
+        src: /tmp/harbor-offline-installer-v1.10.19-rc1.tgz
+        dest: /opt
+        remote_src: yes
+
+    - name: Change directory to harbor folder
+      command: chdir=/opt/harbor ls -al
+      register: harbor_ls
+
+    - name: Edit harbor.yml file for hostname
+      ansible.builtin.lineinfile:
+        path: /opt/harbor/harbor.yml
+        regexp: '^hostname:'
+        line: 'hostname: {{ ansible_host }}'
+
+    - name: Comment out https block in harbor.yml
+      ansible.builtin.replace:
+        path: /opt/harbor/harbor.yml
+        regexp: '^(https:|  port: 443|  certificate: /your/certificate/path|  private_key: /your/private/key/path)'
+        replace: '# \1'
+
+    - name: Run Harbor installer
+      command: /opt/harbor/install.sh
+      args:
+        chdir: /opt/harbor
+
+    - name: Display Harbor web UI info
+      debug:
+        msg: |
+          Harbor installed successfully!
+          Access it via:
+          http://{{ ansible_host }}
+          User: admin
+          Password: Harbor12345
