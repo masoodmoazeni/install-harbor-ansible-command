@@ -50,4 +50,12 @@ nano /etc/docker/daemon.json
 {
      "insecure-registries":["http://your-ip"]
 }
+systemctl restart docker
 ``` 
+at the end test your harbor docker registry
+```
+docker login your-ip
+docker pull httpd
+docker tag httpd your-ip/test/httpd
+docker push your-ip/test/httpd
+```
