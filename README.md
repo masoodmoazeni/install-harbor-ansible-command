@@ -24,15 +24,15 @@ then edit harbor.yml with this changes
 hostname: -> add your-ip or you domain
 https -> block https hidden 
 ```
-
 at the end run this command
-
-
 ```
 ./install.sh
 ```
 at then end you can see this message
+
+
 ![image](https://github.com/user-attachments/assets/f6da6ba8-6ec8-4016-b1fa-ad62372741ac)
+
 
 surprised , you can see harbor website
 ```
